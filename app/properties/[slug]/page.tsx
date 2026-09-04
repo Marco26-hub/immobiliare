@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { ArrowLeft, Bath, BedDouble, MapPin, Maximize2, Sparkles } from 'lucide-react';
 import { formatPrice, seedProperties } from '@/app/data';
+import { getPropertyBySlug } from '@/lib/properties';
 
 export function generateStaticParams() {
   return seedProperties.map((property) => ({ slug: property.slug }));
@@ -12,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = seedProperties.find((item) => item.slug === slug) || seedProperties[0];
+  const property = (await getPropertyBySlug(slug)) || seedProperties[0];
   return {
     title: `${property.title} | Maison Aurea`,
     description: property.shortDescription,
@@ -30,7 +32,10 @@ export default async function PropertyDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = seedProperties.find((item) => item.slug === slug) || seedProperties[0];
+  const property = await getPropertyBySlug(slug);
+  if (!property) {
+    notFound();
+  }
 
   return (
     <main className="min-h-screen bg-[#f7f1e8] text-[#161410]">
@@ -123,4 +128,3 @@ export default async function PropertyDetail({
     </main>
   );
 }
-

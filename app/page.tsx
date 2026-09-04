@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowUpRight,
@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
-import { formatPrice, seedProperties } from './data';
+import { formatPrice, seedProperties, type Property } from './data';
 
 const channels = [
   'Immobiliare.it',
@@ -34,12 +34,20 @@ export default function HomePage() {
   const [city, setCity] = useState('Tutte');
   const [typology, setTypology] = useState('Tutte');
   const [budget, setBudget] = useState('Qualsiasi');
+  const [properties, setProperties] = useState<Property[]>(seedProperties);
 
-  const cities = ['Tutte', ...Array.from(new Set(seedProperties.map((item) => item.city)))];
-  const types = ['Tutte', ...Array.from(new Set(seedProperties.map((item) => item.category)))];
+  useEffect(() => {
+    fetch('/api/properties')
+      .then((response) => response.json())
+      .then((data) => setProperties(data.properties || seedProperties))
+      .catch(() => setProperties(seedProperties));
+  }, []);
+
+  const cities = ['Tutte', ...Array.from(new Set(properties.map((item) => item.city)))];
+  const types = ['Tutte', ...Array.from(new Set(properties.map((item) => item.category)))];
 
   const filtered = useMemo(() => {
-    return seedProperties.filter((property) => {
+    return properties.filter((property) => {
       const budgetMatch =
         budget === 'Qualsiasi' ||
         (budget === 'Fino a 900k' && property.price <= 900000) ||
@@ -51,13 +59,15 @@ export default function HomePage() {
         budgetMatch
       );
     });
-  }, [budget, city, typology]);
+  }, [budget, city, properties, typology]);
 
-  const hero = seedProperties[0];
+  const hero = properties.find((property) => property.featured) || properties[0] || seedProperties[0];
 
   return (
-    <main className="min-h-screen bg-[#f7f1e8] text-[#171511]">
-      <header className="sticky top-0 z-40 border-b border-[#d7c8b3]/70 bg-[#f7f1e8]/88 backdrop-blur-xl">
+    <main className="site-shell min-h-screen bg-[#f7f1e8] text-[#171511]">
+      <div aria-hidden="true" className="ambient-grid" />
+      <div aria-hidden="true" className="luxury-noise" />
+      <header className="sticky top-0 z-40 border-b border-[#d7c8b3]/60 bg-[#f7f1e8]/78 backdrop-blur-2xl">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <Link className="flex items-center gap-3" href="/">
             <span className="brand-mark">
@@ -82,21 +92,35 @@ export default function HomePage() {
         </nav>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-5 pb-12 pt-7 lg:grid-cols-[0.95fr_1.05fr] lg:pb-20">
-        <div className="flex min-h-[620px] flex-col justify-between">
+      <section className="relative mx-auto grid max-w-7xl gap-8 px-5 pb-12 pt-7 lg:grid-cols-[0.95fr_1.05fr] lg:pb-20">
+        <div className="hero-copy flex min-h-[620px] flex-col justify-between">
           <div>
-            <p className="eyebrow">Agenzia immobiliare premium</p>
-            <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-[0.95] md:text-7xl">
-              Case importanti, raccontate come meritano.
+            <p className="eyebrow">Luxury real estate advisory</p>
+            <h1 className="display-type mt-5 max-w-3xl text-5xl leading-[0.95] md:text-7xl">
+              Dimore rare, presentate con precisione sartoriale.
             </h1>
-            <p className="mt-7 max-w-xl text-lg leading-8 text-[#5f574b]">
-              Un sito immobiliare di nuova generazione per acquisire incarichi,
-              promuovere proprietà selezionate e distribuire gli annunci sui portali
-              più rilevanti.
+            <p className="designer-copy mt-7 max-w-xl text-lg leading-8 text-[#5f574b]">
+              Maison Aurea cura acquisizione, racconto e distribuzione digitale
+              di immobili selezionati. Ogni annuncio nasce per valorizzare
+              architettura, posizione e desiderabilità commerciale.
             </p>
+            <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
+              <span className="lux-stat">
+                <strong>24h</strong>
+                lancio
+              </span>
+              <span className="lux-stat">
+                <strong>6+</strong>
+                canali
+              </span>
+              <span className="lux-stat">
+                <strong>CRM</strong>
+                privato
+              </span>
+            </div>
           </div>
 
-          <div className="mt-10 grid gap-3 rounded-[8px] border border-[#d6c4a7] bg-[#fffaf2]/80 p-3 shadow-[0_24px_80px_rgb(55_38_18/10%)] md:grid-cols-4">
+          <div className="search-panel mt-10 grid gap-3 rounded-[8px] border border-[#d6c4a7] bg-[#fffaf2]/80 p-3 shadow-[0_24px_80px_rgb(55_38_18/10%)] md:grid-cols-4">
             <Filter label="Città" onChange={setCity} options={cities} value={city} />
             <Filter label="Tipologia" onChange={setTypology} options={types} value={typology} />
             <Filter
@@ -112,15 +136,17 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative min-h-[620px] overflow-hidden rounded-[8px] bg-[#191612]">
+        <div className="hero-visual relative min-h-[620px] overflow-hidden rounded-[8px] bg-[#191612]">
           <img
             alt={hero.title}
             className="absolute inset-0 h-full w-full object-cover opacity-88"
             src={hero.heroImage}
           />
+          <div aria-hidden="true" className="image-sheen" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,13,9,0.05),rgba(16,13,9,0.72))]" />
+          <div aria-hidden="true" className="floor-plan-lines" />
           <div className="absolute left-5 right-5 top-5 flex items-center justify-between">
-            <span className="rounded-full bg-[#fffaf2]/92 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em]">
+            <span className="glow-badge rounded-full bg-[#fffaf2]/92 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em]">
               In evidenza
             </span>
             <span className="rounded-full bg-[#d7a84d] px-4 py-2 text-sm font-bold">
@@ -151,17 +177,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="promozione" className="border-y border-[#d7c8b3] bg-[#171511] py-8 text-[#fff7ea]">
+      <section id="promozione" className="portal-band border-y border-[#d7c8b3] bg-[#171511] py-8 text-[#fff7ea]">
         <div className="mx-auto grid max-w-7xl gap-6 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <p className="eyebrow gold">Distribuzione portali</p>
-            <h2 className="mt-3 text-3xl font-semibold md:text-5xl">
-              Un solo caricamento, pronto per tutti i canali.
+            <p className="eyebrow gold">Syndication immobiliare</p>
+            <h2 className="display-type mt-3 text-3xl md:text-5xl">
+              Dal dossier interno ai portali, senza duplicare il lavoro.
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {channels.map((channel) => (
-              <span className="portal-pill" key={channel}>
+              <span className="portal-pill portal-pill-animated" key={channel}>
                 <CheckCircle2 className="h-4 w-4" />
                 {channel}
               </span>
@@ -170,21 +196,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="immobili" className="mx-auto max-w-7xl px-5 py-16">
+      <section id="immobili" className="relative mx-auto max-w-7xl px-5 py-16">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow">Portfolio</p>
-            <h2 className="mt-3 text-4xl font-semibold md:text-6xl">Immobili selezionati</h2>
+            <p className="eyebrow">Portfolio curato</p>
+            <h2 className="display-type mt-3 text-4xl md:text-6xl">Residenze in rappresentanza</h2>
           </div>
           <p className="max-w-md text-[#655c4f]">
-            Ogni scheda è pensata per vendere: fotografia dominante, dettagli chiari,
-            storytelling e call to action dirette.
+            Schede sintetiche, immagini dominanti e dati immediati: il cliente
+            deve percepire valore prima ancora di chiedere una visita.
           </p>
         </div>
 
         <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((property) => (
-            <Link className="property-card group" href={`/properties/${property.slug}`} key={property.id}>
+            <Link className="property-card group reveal-card" href={`/properties/${property.slug}`} key={property.id}>
               <div className="relative aspect-[1.18] overflow-hidden rounded-[8px]">
                 <img
                   alt={property.title}
@@ -212,13 +238,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="metodo" className="bg-[#fffaf2] py-16">
+      <section id="metodo" className="method-section bg-[#fffaf2] py-16">
         <div className="mx-auto grid max-w-7xl gap-5 px-5 lg:grid-cols-4">
           {[
-            [Building2, 'Acquisizione', 'Schede eleganti per convincere proprietari e venditori di fascia alta.'],
-            [Camera, 'Media premium', 'Hero photo, gallery, planimetrie e contenuti pronti per campagne.'],
-            [Megaphone, 'Portali', 'Export e canali collegabili a Immobiliare.it, Idealista, Casa.it, Subito e altri.'],
-            [ShieldCheck, 'Controllo', 'Admin interno per stato, prezzo, promozione, descrizioni e pubblicazione.'],
+            [Building2, 'Mandato', 'Presentazione autorevole per acquisire proprietà e rassicurare venditori esigenti.'],
+            [Camera, 'Immagine', 'Fotografia centrale, gallery, testi e punti forti pronti per campagne e dossier.'],
+            [Megaphone, 'Distribuzione', 'Feed e mapping per Immobiliare.it, Idealista, Casa.it, Subito e altri canali.'],
+            [ShieldCheck, 'Governance', 'Pannello interno per prezzo, stato, promozione, descrizioni e pubblicazione.'],
           ].map(([Icon, title, text]) => (
             <article className="method-card" key={String(title)}>
               <Icon className="h-7 w-7 text-[#b57f2a]" />
@@ -233,7 +259,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
             <strong className="text-2xl">Maison Aurea</strong>
-            <p className="mt-1 text-[#b8ab96]">Sito premium con gestione immobiliare integrata.</p>
+            <p className="mt-1 text-[#b8ab96]">Atelier digitale per immobili di pregio e mandati qualificati.</p>
           </div>
           <Link className="premium-button gold" href="/admin">
             Apri admin
@@ -267,4 +293,3 @@ function Filter({
     </label>
   );
 }
-

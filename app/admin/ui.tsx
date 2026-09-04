@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   const [selected, setSelected] = useState<Partial<Property>>(emptyForm);
   const [query, setQuery] = useState('');
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetch('/api/properties')
@@ -94,10 +95,29 @@ export default function AdminDashboard() {
     setProperties((items) => items.filter((item) => item.id !== id));
   }
 
+  async function uploadHeroImage(file: File) {
+    setUploading(true);
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const response = await fetch('/api/uploads', {
+        method: 'POST',
+        body: form,
+      });
+      const data = await response.json();
+      if (data.url) {
+        setSelected((current) => ({ ...current, heroImage: data.url }));
+      }
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-[#12110f] text-[#fff7ea]">
+    <main className="admin-shell min-h-screen bg-[#12110f] text-[#fff7ea]">
+      <div aria-hidden="true" className="admin-aurora" />
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className="border-b border-white/10 bg-[#171511] px-5 py-6 lg:border-b-0 lg:border-r">
+        <aside className="admin-sidebar border-b border-white/10 bg-[#171511] px-5 py-6 lg:border-b-0 lg:border-r">
           <Link className="flex items-center gap-3" href="/">
             <span className="grid h-11 w-11 place-items-center rounded-[8px] bg-[#d7a84d] text-[#15120d]">
               <Gem className="h-5 w-5" />
@@ -137,14 +157,14 @@ export default function AdminDashboard() {
           </div>
         </aside>
 
-        <section className="px-5 py-6 lg:px-8">
+        <section className="relative px-5 py-6 lg:px-8">
           <header className="flex flex-col gap-4 border-b border-white/10 pb-6 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d7a84d]">
-                Admin operativo
+                Private command suite
               </p>
-              <h1 className="mt-2 text-3xl font-semibold md:text-5xl">
-                Gestisci immobili, contenuti e promozioni.
+              <h1 className="display-type mt-2 text-3xl md:text-5xl">
+                Regia completa di portfolio, media e distribuzione.
               </h1>
             </div>
             <Link className="premium-button gold w-fit" href="/">
@@ -157,7 +177,7 @@ export default function AdminDashboard() {
             <section>
               <div className="mb-5 grid gap-3 lg:grid-cols-3">
                 {portalRows.slice(0, 3).map(([name, status, feed]) => (
-                  <a className="portal-admin-card" href={feed} key={name} target="_blank">
+                  <a className="portal-admin-card pulse-edge" href={feed} key={name} target="_blank">
                     <span>
                       <Megaphone className="h-4 w-4" />
                       {status}
@@ -172,12 +192,12 @@ export default function AdminDashboard() {
                 <input
                   className="w-full bg-transparent text-sm outline-none placeholder:text-[#8d826f]"
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Cerca per città, zona, tipologia..."
+                  placeholder="Cerca una residenza per città, quartiere o categoria..."
                   value={query}
                 />
               </div>
 
-              <div className="mt-5 overflow-hidden rounded-[8px] border border-white/10">
+              <div className="admin-table mt-5 overflow-hidden rounded-[8px] border border-white/10">
                 {filtered.map((property) => (
                   <article className="admin-row" key={property.id}>
                     <img alt="" className="h-24 w-28 object-cover" src={property.heroImage} />
@@ -217,7 +237,7 @@ export default function AdminDashboard() {
               </div>
             </section>
 
-            <aside className="rounded-[8px] border border-[#d7a84d]/30 bg-[#fff7ea] p-5 text-[#171511]">
+            <aside className="admin-form-panel rounded-[8px] border border-[#d7a84d]/30 bg-[#fff7ea] p-5 text-[#171511]">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold">Scheda immobile</h2>
                 <span className="grid h-10 w-10 place-items-center rounded-[8px] bg-[#171511] text-[#d7a84d]">
@@ -228,7 +248,7 @@ export default function AdminDashboard() {
               <div className="mt-5 grid gap-3">
                 <Input
                   onChange={(event) => setSelected({ ...selected, title: event.target.value })}
-                  placeholder="Titolo annuncio"
+                  placeholder="Titolo editoriale dell'immobile"
                   value={selected.title || ''}
                 />
                 <div className="grid grid-cols-2 gap-3">
@@ -273,22 +293,41 @@ export default function AdminDashboard() {
                   placeholder="URL foto principale"
                   value={selected.heroImage || ''}
                 />
+                <label className="upload-dropzone">
+                  <ImagePlus className="h-5 w-5" />
+                  <span>
+                    <strong>{uploading ? 'Caricamento in corso...' : 'Carica foto principale'}</strong>
+                    <small>JPG, PNG o WebP archiviati su Vercel Blob.</small>
+                  </span>
+                  <input
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={uploading}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        void uploadHeroImage(file);
+                      }
+                    }}
+                    type="file"
+                  />
+                </label>
                 <Textarea
                   onChange={(event) => setSelected({ ...selected, shortDescription: event.target.value })}
-                  placeholder="Descrizione breve per card e promozioni"
+                  placeholder="Sintesi commerciale per card, portali e campagne"
                   value={selected.shortDescription || ''}
                 />
                 <Textarea
                   className="min-h-28"
                   onChange={(event) => setSelected({ ...selected, description: event.target.value })}
-                  placeholder="Descrizione completa"
+                  placeholder="Racconto completo: posizione, architettura, lifestyle e leve di vendita"
                   value={selected.description || ''}
                 />
 
                 <label className="admin-toggle">
                   <span>
                     <strong>Metti in evidenza</strong>
-                    <small>Compare nella selezione principale.</small>
+                    <small>Porta la proprietà nella selezione di apertura.</small>
                   </span>
                   <Switch
                     checked={Boolean(selected.featured)}
@@ -298,7 +337,7 @@ export default function AdminDashboard() {
                 <label className="admin-toggle">
                   <span>
                     <strong>Promuovi annuncio</strong>
-                    <small>Aumenta priorità e badge marketing.</small>
+                    <small>Attiva priorità visiva e badge campagna.</small>
                   </span>
                   <Switch
                     checked={Boolean(selected.promoted)}
@@ -317,7 +356,7 @@ export default function AdminDashboard() {
                     Caricamento immagini
                   </p>
                   <p className="mt-1 text-sm text-[#6f604d]">
-                    Il sito include già l’endpoint per archiviare foto in modo permanente. Il campo URL consente di collegare foto professionali, CDN o immagini caricate.
+                    Le immagini vengono salvate su Vercel Blob; l’URL generato viene inserito automaticamente nella scheda.
                   </p>
                 </div>
 
