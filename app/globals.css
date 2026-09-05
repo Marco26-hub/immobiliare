@@ -377,7 +377,10 @@ body {
 }
 
 .property-card {
-  display: block;
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
   border-radius: 8px;
   border: 1px solid #d7c8b3;
   background: #fffaf2;
@@ -386,6 +389,35 @@ body {
     transform 220ms ease,
     box-shadow 220ms ease,
     border-color 220ms ease;
+}
+
+.property-media {
+  aspect-ratio: 4 / 3;
+  flex: none;
+  background: #e8dece;
+}
+
+.property-media img {
+  display: block;
+}
+
+.property-image-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 60%, rgb(20 15 10 / 18%));
+}
+
+.property-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0;
+}
+
+.property-content > div:last-child {
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .property-card:hover {

@@ -136,7 +136,7 @@ export const seedProperties: Property[] = [
     promoted: false,
     category: 'Appartamento',
     heroImage:
-      'https://images.unsplash.com/photo-1600566752229-250ed79470cb?auto=format&fit=crop&w=1800&q=85',
+      'https://images.unsplash.com/photo-1630701052108-5601f06df085?auto=format&fit=crop&w=1800&q=85',
     gallery: [
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85',
       'https://images.unsplash.com/photo-1600607688960-e095ff83135c?auto=format&fit=crop&w=1400&q=85',
@@ -156,4 +156,3 @@ export const formatPrice = (value: number) =>
     currency: 'EUR',
     maximumFractionDigits: 0,
   }).format(value);
-

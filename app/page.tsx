@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { type SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowUpRight,
@@ -40,6 +40,14 @@ const socialLinks = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/', icon: BriefcaseBusiness },
   { label: 'WhatsApp', href: 'https://www.whatsapp.com/', icon: MessageCircle },
 ];
+
+const imageFallback =
+  'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85';
+
+function useImageFallback(event: SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = imageFallback;
+}
 
 export default function HomePage() {
   const [city, setCity] = useState('Tutte');
@@ -151,6 +159,7 @@ export default function HomePage() {
           <img
             alt={hero.title}
             className="absolute inset-0 h-full w-full object-cover opacity-88"
+            onError={useImageFallback}
             src={hero.heroImage}
           />
           <div aria-hidden="true" className="image-sheen" />
@@ -219,24 +228,28 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-9 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-4">
           {filtered.map((property) => (
             <Link className="property-card group reveal-card" href={`/properties/${property.slug}`} key={property.id}>
-              <div className="relative aspect-[1.18] overflow-hidden rounded-[8px]">
+              <div className="property-media relative overflow-hidden rounded-[8px]">
                 <img
                   alt={property.title}
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  decoding="async"
+                  loading="lazy"
+                  onError={useImageFallback}
                   src={property.heroImage}
                 />
+                <span aria-hidden="true" className="property-image-shade" />
                 {property.promoted && <span className="promo-badge">Promosso</span>}
               </div>
-              <div className="pt-4">
+              <div className="property-content pt-4">
                 <p className="text-sm uppercase tracking-[0.14em] text-[#8a6432]">
                   {property.city} · {property.category}
                 </p>
-                <h3 className="mt-2 text-2xl font-semibold leading-tight">{property.title}</h3>
+                <h3 className="mt-2 text-xl font-semibold leading-tight 2xl:text-2xl">{property.title}</h3>
                 <p className="mt-3 line-clamp-2 text-[#655c4f]">{property.shortDescription}</p>
-                <div className="mt-5 flex items-center justify-between border-t border-[#d7c8b3] pt-4">
+                <div className="mt-auto flex items-center justify-between border-t border-[#d7c8b3] pt-4">
                   <strong>{formatPrice(property.price)}</strong>
                   <span className="flex items-center gap-2 text-sm">
                     Dettagli
