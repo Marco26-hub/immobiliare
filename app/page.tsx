@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   ChevronRight,
   Gem,
-  Home,
   MapPin,
   Maximize2,
   MessageCircle,
@@ -44,7 +43,7 @@ const socialLinks = [
 const imageFallback =
   'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85';
 
-function useImageFallback(event: SyntheticEvent<HTMLImageElement>) {
+function handleImageError(event: SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.onerror = null;
   event.currentTarget.src = imageFallback;
 }
@@ -86,60 +85,79 @@ export default function HomePage() {
     <main className="site-shell min-h-screen bg-[#f7f1e8] text-[#171511]">
       <div aria-hidden="true" className="ambient-grid" />
       <div aria-hidden="true" className="luxury-noise" />
-      <header className="sticky top-0 z-40 border-b border-[#d7c8b3]/60 bg-[#f7f1e8]/78 backdrop-blur-2xl">
+      <header className="public-header sticky top-0 z-40">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <Link className="flex items-center gap-3" href="/">
             <span className="brand-mark">
               <Gem className="h-5 w-5" />
             </span>
             <span>
-              <strong className="block text-lg leading-none">Maison Aurea</strong>
-              <small className="text-xs uppercase tracking-[0.18em] text-[#8a6432]">
+              <strong className="block text-lg leading-none text-[#fff7ea]">Maison Aurea</strong>
+              <small className="text-xs uppercase tracking-[0.18em] text-[#d7a84d]">
                 Real estate atelier
               </small>
             </span>
           </Link>
-          <div className="hidden items-center gap-7 text-sm font-medium lg:flex">
+          <div className="hidden items-center gap-8 text-sm font-medium text-[#e9dfcf] lg:flex">
             <a href="#immobili">Immobili</a>
             <a href="#promozione">Promozione</a>
             <a href="#metodo">Metodo</a>
           </div>
-          <Link className="premium-button dark" href="/admin">
-            Admin
+          <Link className="premium-button header-admin" href="/admin">
+            <span className="hidden sm:inline">Area riservata</span>
+            <span className="sm:hidden">Admin</span>
             <ArrowUpRight className="h-4 w-4" />
           </Link>
         </nav>
       </header>
 
-      <section className="relative mx-auto grid max-w-7xl gap-8 px-5 pb-12 pt-7 lg:grid-cols-[0.95fr_1.05fr] lg:pb-20">
-        <div className="hero-copy flex min-h-[620px] flex-col justify-between">
-          <div>
-            <p className="eyebrow">Luxury real estate advisory</p>
-            <h1 className="display-type mt-5 max-w-3xl text-5xl leading-[0.95] md:text-7xl">
-              Dimore rare, presentate con precisione sartoriale.
+      <section className="editorial-hero">
+        <img
+          alt={hero.title}
+          className="editorial-hero-image"
+          onError={handleImageError}
+          src={hero.heroImage}
+        />
+        <div aria-hidden="true" className="editorial-hero-overlay" />
+        <div aria-hidden="true" className="editorial-hero-rule" />
+
+        <div className="editorial-hero-inner mx-auto max-w-7xl px-5">
+          <div className="hero-copy max-w-4xl">
+            <p className="eyebrow gold">Maison Aurea · Luxury real estate advisory</p>
+            <h1 className="display-type mt-5 text-5xl leading-[0.92] text-white md:text-7xl lg:text-8xl">
+              Immobili di pregio, rappresentati con visione.
             </h1>
-            <p className="designer-copy mt-7 max-w-xl text-lg leading-8 text-[#5f574b]">
-              Maison Aurea cura acquisizione, racconto e distribuzione digitale
-              di immobili selezionati. Ogni annuncio nasce per valorizzare
-              architettura, posizione e desiderabilità commerciale.
+            <p className="designer-copy mt-6 max-w-2xl text-base leading-7 text-[#eee6da] md:text-lg md:leading-8">
+              Selezioniamo dimore rare e ne costruiamo il valore attraverso immagine,
+              consulenza e distribuzione digitale internazionale.
             </p>
-            <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
-              <span className="lux-stat">
-                <strong>24h</strong>
-                lancio
-              </span>
-              <span className="lux-stat">
-                <strong>6+</strong>
-                canali
-              </span>
-              <span className="lux-stat">
-                <strong>CRM</strong>
-                privato
-              </span>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a className="premium-button gold" href="#immobili">
+                Esplora le proprietà
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
+              <a className="premium-button hero-secondary-button" href="#contatti">
+                Affida il tuo immobile
+              </a>
             </div>
           </div>
 
-          <div className="search-panel mt-10 grid gap-3 rounded-[8px] border border-[#d6c4a7] bg-[#fffaf2]/80 p-3 shadow-[0_24px_80px_rgb(55_38_18/10%)] md:grid-cols-4">
+          <Link className="featured-signature" href={`/properties/${hero.slug}`}>
+            <span className="featured-index">In evidenza · 01</span>
+            <span className="featured-title">{hero.title}</span>
+            <span className="featured-location">
+              <MapPin className="h-4 w-4" />
+              {hero.city}, {hero.district}
+            </span>
+            <span className="featured-metrics">
+              <span><Maximize2 className="h-4 w-4" /> {hero.surface} mq</span>
+              <span><BedDouble className="h-4 w-4" /> {hero.rooms} locali</span>
+              <span><Bath className="h-4 w-4" /> {hero.bathrooms} bagni</span>
+            </span>
+            <strong>{formatPrice(hero.price)}</strong>
+          </Link>
+
+          <div className="hero-search search-panel grid gap-2 p-2 md:grid-cols-4">
             <Filter label="Città" onChange={setCity} options={cities} value={city} />
             <Filter label="Tipologia" onChange={setTypology} options={types} value={typology} />
             <Filter
@@ -152,47 +170,6 @@ export default function HomePage() {
               <Search className="h-5 w-5" />
               Cerca
             </a>
-          </div>
-        </div>
-
-        <div className="hero-visual relative min-h-[620px] overflow-hidden rounded-[8px] bg-[#191612]">
-          <img
-            alt={hero.title}
-            className="absolute inset-0 h-full w-full object-cover opacity-88"
-            onError={useImageFallback}
-            src={hero.heroImage}
-          />
-          <div aria-hidden="true" className="image-sheen" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,13,9,0.05),rgba(16,13,9,0.72))]" />
-          <div aria-hidden="true" className="floor-plan-lines" />
-          <div className="absolute left-5 right-5 top-5 flex items-center justify-between">
-            <span className="glow-badge rounded-full bg-[#fffaf2]/92 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em]">
-              In evidenza
-            </span>
-            <span className="rounded-full bg-[#d7a84d] px-4 py-2 text-sm font-bold">
-              {formatPrice(hero.price)}
-            </span>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 p-5 text-white md:p-8">
-            <p className="mb-3 flex items-center gap-2 text-sm text-[#f4d99a]">
-              <MapPin className="h-4 w-4" />
-              {hero.city}, {hero.district}
-            </p>
-            <h2 className="max-w-xl text-4xl font-semibold leading-tight">{hero.title}</h2>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <span className="hero-chip">
-                <Maximize2 className="h-4 w-4" />
-                {hero.surface} mq
-              </span>
-              <span className="hero-chip">
-                <BedDouble className="h-4 w-4" />
-                {hero.rooms} locali
-              </span>
-              <span className="hero-chip">
-                <Bath className="h-4 w-4" />
-                {hero.bathrooms} bagni
-              </span>
-            </div>
           </div>
         </div>
       </section>
@@ -216,16 +193,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="immobili" className="relative mx-auto max-w-7xl px-5 py-16">
+      <section id="immobili" className="relative mx-auto max-w-7xl px-5 py-20">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow">Portfolio curato</p>
+            <p className="eyebrow">01 · Portfolio curato</p>
             <h2 className="display-type mt-3 text-4xl md:text-6xl">Residenze in rappresentanza</h2>
           </div>
-          <p className="max-w-md text-[#655c4f]">
-            Schede sintetiche, immagini dominanti e dati immediati: il cliente
-            deve percepire valore prima ancora di chiedere una visita.
-          </p>
+          <div className="max-w-md border-l border-[#b99051] pl-5 text-[#655c4f]">
+            <strong className="block text-sm uppercase text-[#171511]">{filtered.length} proprietà selezionate</strong>
+            <p className="mt-2">Ogni incarico riceve una strategia di posizionamento, immagine e distribuzione dedicata.</p>
+          </div>
         </div>
 
         <div className="mt-9 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -237,7 +214,7 @@ export default function HomePage() {
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                   decoding="async"
                   loading="lazy"
-                  onError={useImageFallback}
+                  onError={handleImageError}
                   src={property.heroImage}
                 />
                 <span aria-hidden="true" className="property-image-shade" />
@@ -262,24 +239,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="metodo" className="method-section bg-[#fffaf2] py-16">
-        <div className="mx-auto grid max-w-7xl gap-5 px-5 lg:grid-cols-4">
-          {[
-            [Building2, 'Mandato', 'Presentazione autorevole per acquisire proprietà e rassicurare venditori esigenti.'],
-            [Camera, 'Immagine', 'Fotografia centrale, gallery, testi e punti forti pronti per campagne e dossier.'],
-            [Megaphone, 'Distribuzione', 'Feed e mapping per Immobiliare.it, Idealista, Casa.it, Subito e altri canali.'],
-            [ShieldCheck, 'Governance', 'Pannello interno per prezzo, stato, promozione, descrizioni e pubblicazione.'],
-          ].map(([Icon, title, text]) => (
-            <article className="method-card" key={String(title)}>
-              <Icon className="h-7 w-7 text-[#b57f2a]" />
-              <h3>{String(title)}</h3>
-              <p>{String(text)}</p>
-            </article>
-          ))}
+      <section id="metodo" className="method-section bg-[#fffaf2] py-20">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-[0.72fr_1.28fr]">
+          <div className="method-intro">
+            <p className="eyebrow">02 · Il nostro metodo</p>
+            <h2 className="display-type mt-4 text-4xl leading-none md:text-6xl">
+              Una regia unica, dall’incarico alla trattativa.
+            </h2>
+            <p className="mt-6 max-w-md leading-7 text-[#655c4f]">
+              Tecnologia e sensibilità editoriale lavorano insieme per aumentare
+              qualità percepita, copertura e precisione commerciale.
+            </p>
+          </div>
+          <div className="method-list">
+            {[
+              [Building2, 'Mandato', 'Analisi, posizionamento e presentazione autorevole per proprietari esigenti.'],
+              [Camera, 'Immagine', 'Direzione fotografica, gallery e testi costruiti intorno al carattere della proprietà.'],
+              [Megaphone, 'Distribuzione', 'Pubblicazione coordinata su Immobiliare.it, Idealista, Casa.it, Subito e altri canali.'],
+              [ShieldCheck, 'Governance', 'Controllo centralizzato di prezzo, stato, promozione, media e pubblicazione.'],
+            ].map(([Icon, title, text], index) => (
+              <article className="method-row" key={String(title)}>
+                <span className="method-number">0{index + 1}</span>
+                <Icon className="h-6 w-6 text-[#b57f2a]" />
+                <h3>{String(title)}</h3>
+                <p>{String(text)}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <footer className="bg-[#171511] px-5 py-10 text-[#fff7ea]">
+      <section className="owner-cta" id="contatti">
+        <div className="mx-auto flex max-w-7xl flex-col gap-7 px-5 py-16 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="eyebrow gold">Valutazione riservata</p>
+            <h2 className="display-type mt-4 max-w-4xl text-4xl leading-none text-white md:text-6xl">
+              La tua proprietà merita una presentazione all’altezza del suo valore.
+            </h2>
+          </div>
+          <a className="premium-button gold shrink-0" href="https://www.whatsapp.com/" rel="noreferrer" target="_blank">
+            Parla con un advisor
+            <ArrowUpRight className="h-4 w-4" />
+          </a>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/10 bg-[#171511] px-5 py-10 text-[#fff7ea]">
         <div className="mx-auto grid max-w-7xl gap-7 md:grid-cols-[1fr_auto_auto] md:items-center">
           <div>
             <strong className="text-2xl">Maison Aurea</strong>
