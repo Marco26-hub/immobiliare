@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowUpRight,
+  AtSign,
   Bath,
   BedDouble,
+  BriefcaseBusiness,
   Building2,
   Camera,
   CheckCircle2,
@@ -14,10 +16,12 @@ import {
   Home,
   MapPin,
   Maximize2,
+  MessageCircle,
   Megaphone,
   Search,
   ShieldCheck,
   Sparkles,
+  Users,
 } from 'lucide-react';
 import { formatPrice, seedProperties, type Property } from './data';
 
@@ -28,6 +32,13 @@ const channels = [
   'Subito',
   'Wikicasa',
   'Trovacasa',
+];
+
+const socialLinks = [
+  { label: 'Instagram', href: 'https://www.instagram.com/', icon: AtSign },
+  { label: 'Facebook', href: 'https://www.facebook.com/', icon: Users },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/', icon: BriefcaseBusiness },
+  { label: 'WhatsApp', href: 'https://www.whatsapp.com/', icon: MessageCircle },
 ];
 
 export default function HomePage() {
@@ -256,17 +267,43 @@ export default function HomePage() {
       </section>
 
       <footer className="bg-[#171511] px-5 py-10 text-[#fff7ea]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto grid max-w-7xl gap-7 md:grid-cols-[1fr_auto_auto] md:items-center">
           <div>
             <strong className="text-2xl">Maison Aurea</strong>
             <p className="mt-1 text-[#b8ab96]">Atelier digitale per immobili di pregio e mandati qualificati.</p>
           </div>
+          <nav aria-label="Canali social" className="social-links">
+            {socialLinks.map(({ href, icon: Icon, label }) => (
+              <a
+                aria-label={label}
+                href={href}
+                key={label}
+                rel="noreferrer"
+                target="_blank"
+                title={label}
+              >
+                <Icon className="h-5 w-5" />
+              </a>
+            ))}
+          </nav>
           <Link className="premium-button gold" href="/admin">
             Apri admin
             <Sparkles className="h-4 w-4" />
           </Link>
         </div>
       </footer>
+
+      <a
+        aria-label="Contatta Maison Aurea su WhatsApp"
+        className="whatsapp-fab"
+        href="https://www.whatsapp.com/"
+        rel="noreferrer"
+        target="_blank"
+        title="WhatsApp"
+      >
+        <MessageCircle className="h-6 w-6" />
+        <span>Parliamo</span>
+      </a>
     </main>
   );
 }
