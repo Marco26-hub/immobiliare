@@ -1,7 +1,8 @@
 'use client';
 
-import { type SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import { type SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import useEmblaCarousel from 'embla-carousel-react';
 import {
   ArrowUpRight,
   AtSign,
@@ -11,6 +12,7 @@ import {
   Building2,
   Camera,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   Gem,
   KeyRound,
@@ -81,6 +83,10 @@ export default function HomePage() {
   const [typology, setTypology] = useState('Tutte');
   const [budget, setBudget] = useState('Qualsiasi');
   const [properties, setProperties] = useState<Property[]>(seedProperties);
+  const [carouselPaused, setCarouselPaused] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [carouselRef, carouselApi] = useEmblaCarousel({ align: 'start', loop: false });
 
   useEffect(() => {
     fetch('/api/properties')
@@ -108,6 +114,37 @@ export default function HomePage() {
   }, [budget, city, properties, typology]);
 
   const hero = properties.find((property) => property.featured) || properties[0] || seedProperties[0];
+
+  const syncCarouselControls = useCallback(() => {
+    if (!carouselApi) return;
+    setCanScrollPrev(carouselApi.canScrollPrev());
+    setCanScrollNext(carouselApi.canScrollNext());
+  }, [carouselApi]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    syncCarouselControls();
+    carouselApi.on('select', syncCarouselControls);
+    carouselApi.on('reInit', syncCarouselControls);
+    return () => {
+      carouselApi.off('select', syncCarouselControls);
+      carouselApi.off('reInit', syncCarouselControls);
+    };
+  }, [carouselApi, syncCarouselControls]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    carouselApi.reInit();
+  }, [carouselApi, filtered]);
+
+  useEffect(() => {
+    if (!carouselApi || carouselPaused || filtered.length < 2) return;
+    const interval = window.setInterval(() => {
+      if (carouselApi.canScrollNext()) carouselApi.scrollNext();
+      else carouselApi.scrollTo(0);
+    }, 5200);
+    return () => window.clearInterval(interval);
+  }, [carouselApi, carouselPaused, filtered.length]);
 
   return (
     <main className="site-shell min-h-screen bg-[#f7f1e8] text-[#171511]">
@@ -154,19 +191,19 @@ export default function HomePage() {
           <div className="hero-copy max-w-4xl">
             <p className="eyebrow gold">Maison Aurea · Luxury real estate advisory</p>
             <h1 className="display-type mt-5 text-5xl leading-[0.92] text-white md:text-7xl lg:text-8xl">
-              Vendita, affitti e gestione. Un solo standard: eccellenza.
+              Dimore in vendita. Presentate al loro massimo valore.
             </h1>
             <p className="designer-copy mt-6 max-w-2xl text-base leading-7 text-[#eee6da] md:text-lg md:leading-8">
-              Dalla valutazione alla firma, fino alla gestione quotidiana: proteggiamo
-              il valore dell’immobile con consulenza, immagine e controllo operativo.
+              Selezioniamo proprietà distintive e le accompagniamo sul mercato con
+              valutazioni accurate, immagini autorevoli e trattative riservate.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a className="premium-button gold" href="#servizi">
-                Scopri i servizi
+              <a className="premium-button gold" href="#immobili">
+                Scopri le dimore
                 <ArrowUpRight className="h-4 w-4" />
               </a>
               <a className="premium-button hero-secondary-button" href="#contatti">
-                Affida il tuo immobile
+                Vendi con Maison Aurea
               </a>
             </div>
           </div>
@@ -203,6 +240,88 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="immobili" className="relative mx-auto w-full max-w-7xl px-5 py-20">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="eyebrow">01 · Portfolio curato</p>
+            <h2 className="display-type mt-3 text-4xl md:text-6xl">Dimore in vendita</h2>
+          </div>
+          <div className="portfolio-controls">
+            <span>{filtered.length} proprietà selezionate</span>
+            <button
+              aria-label="Proprietà precedente"
+              disabled={!canScrollPrev}
+              onClick={() => carouselApi?.scrollPrev()}
+              title="Precedente"
+              type="button"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              aria-label="Proprietà successiva"
+              disabled={!canScrollNext}
+              onClick={() => carouselApi?.scrollNext()}
+              title="Successiva"
+              type="button"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          aria-label="Carosello immobili in vendita"
+          className="property-carousel mt-9"
+          onFocus={() => setCarouselPaused(true)}
+          onMouseEnter={() => setCarouselPaused(true)}
+          onMouseLeave={() => setCarouselPaused(false)}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setCarouselPaused(false);
+          }}
+          ref={carouselRef}
+          role="region"
+        >
+          <div className="property-carousel-track">
+            {filtered.map((property) => (
+              <Link className="property-card property-slide group reveal-card" href={`/properties/${property.slug}`} key={property.id}>
+                <div className="property-media relative overflow-hidden rounded-[8px]">
+                  <img
+                    alt={property.title}
+                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                    decoding="async"
+                    loading="lazy"
+                    onError={handleImageError}
+                    src={property.heroImage}
+                  />
+                  <span aria-hidden="true" className="property-image-shade" />
+                  {property.promoted && <span className="promo-badge">Promosso</span>}
+                </div>
+                <div className="property-content pt-4">
+                  <p className="text-sm uppercase tracking-[0.14em] text-[#8a6432]">
+                    {property.city} · {property.district}
+                  </p>
+                  <h3 className="mt-2 text-xl font-semibold leading-tight 2xl:text-2xl">{property.title}</h3>
+                  <p className="mt-3 text-[#655c4f]">{property.shortDescription}</p>
+                  <div className="property-specs">
+                    <span><Maximize2 className="h-4 w-4" /> {property.surface} mq</span>
+                    <span><BedDouble className="h-4 w-4" /> {property.rooms} locali</span>
+                    <span><Bath className="h-4 w-4" /> {property.bathrooms} bagni</span>
+                    <span>Classe {property.energyClass}</span>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between border-t border-[#d7c8b3] pt-4">
+                    <strong className="property-price">{formatPrice(property.price)}</strong>
+                    <span className="flex items-center gap-2 text-sm font-semibold">
+                      Scopri
+                      <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="promozione" className="portal-band border-y border-[#d7c8b3] bg-[#171511] py-8 text-[#fff7ea]">
         <div className="mx-auto grid max-w-7xl gap-6 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
@@ -226,7 +345,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-5 py-20">
           <div className="services-heading grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <div>
-              <p className="eyebrow">01 · Servizi immobiliari</p>
+              <p className="eyebrow">02 · Servizi immobiliari</p>
               <h2 className="display-type mt-4 text-4xl leading-none md:text-6xl">
                 Tre competenze, un solo interlocutore.
               </h2>
@@ -260,52 +379,6 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section id="immobili" className="relative mx-auto max-w-7xl px-5 py-20">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="eyebrow">02 · Portfolio curato</p>
-            <h2 className="display-type mt-3 text-4xl md:text-6xl">Proprietà selezionate</h2>
-          </div>
-          <div className="max-w-md border-l border-[#b99051] pl-5 text-[#655c4f]">
-            <strong className="block text-sm uppercase text-[#171511]">{filtered.length} proprietà selezionate</strong>
-            <p className="mt-2">Residenze in vendita e opportunità in locazione, presentate con informazioni chiare e immagini di qualità.</p>
-          </div>
-        </div>
-
-        <div className="mt-9 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {filtered.map((property) => (
-            <Link className="property-card group reveal-card" href={`/properties/${property.slug}`} key={property.id}>
-              <div className="property-media relative overflow-hidden rounded-[8px]">
-                <img
-                  alt={property.title}
-                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                  decoding="async"
-                  loading="lazy"
-                  onError={handleImageError}
-                  src={property.heroImage}
-                />
-                <span aria-hidden="true" className="property-image-shade" />
-                {property.promoted && <span className="promo-badge">Promosso</span>}
-              </div>
-              <div className="property-content pt-4">
-                <p className="text-sm uppercase tracking-[0.14em] text-[#8a6432]">
-                  {property.city} · {property.category}
-                </p>
-                <h3 className="mt-2 text-xl font-semibold leading-tight 2xl:text-2xl">{property.title}</h3>
-                <p className="mt-3 line-clamp-2 text-[#655c4f]">{property.shortDescription}</p>
-                <div className="mt-auto flex items-center justify-between border-t border-[#d7c8b3] pt-4">
-                  <strong>{formatPrice(property.price)}</strong>
-                  <span className="flex items-center gap-2 text-sm">
-                    Dettagli
-                    <ChevronRight className="h-4 w-4" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
         </div>
       </section>
 
