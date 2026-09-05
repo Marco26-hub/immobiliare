@@ -19,13 +19,13 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: 'Maison Aurea | Agenzia immobiliare premium',
+  title: 'Maison Aurea | Vendita, affitti e gestione immobiliare',
   description:
-    'Sito immobiliare premium con gestione annunci, promozione proprietà e distribuzione verso i principali portali.',
+    'Consulenza immobiliare premium per vendita, affitti e gestione locazioni. Valutazione, promozione, selezione conduttori e property management.',
   openGraph: {
-    title: 'Maison Aurea | Agenzia immobiliare premium',
+    title: 'Maison Aurea | Vendita, affitti e gestione immobiliare',
     description:
-      'Gestisci e promuovi immobili di pregio con un sito di nuova generazione.',
+      'Un unico interlocutore per vendere, affittare e gestire immobili selezionati.',
   },
 };
 

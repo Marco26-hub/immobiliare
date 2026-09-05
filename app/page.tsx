@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Gem,
+  KeyRound,
   MapPin,
   Maximize2,
   MessageCircle,
@@ -38,6 +39,33 @@ const socialLinks = [
   { label: 'Facebook', href: 'https://www.facebook.com/', icon: Users },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/', icon: BriefcaseBusiness },
   { label: 'WhatsApp', href: 'https://www.whatsapp.com/', icon: MessageCircle },
+];
+
+const services = [
+  {
+    title: 'Vendita',
+    eyebrow: 'Rappresentanza immobiliare',
+    description:
+      'Posizioniamo ogni proprietà nel segmento corretto, costruiamo una presentazione distintiva e conduciamo la trattativa con metodo e riservatezza.',
+    points: ['Valutazione e strategia di prezzo', 'Marketing editoriale e portali', 'Qualifica acquirenti e negoziazione'],
+    icon: Building2,
+  },
+  {
+    title: 'Affitti',
+    eyebrow: 'Locazioni selezionate',
+    description:
+      'Trasformiamo la locazione in un percorso ordinato: dal canone target alla selezione del conduttore, fino alla definizione dell’accordo.',
+    points: ['Analisi del canone di mercato', 'Screening delle candidature', 'Contratto, consegna e verbali'],
+    icon: KeyRound,
+  },
+  {
+    title: 'Gestione locazioni',
+    eyebrow: 'Property management',
+    description:
+      'Seguiamo l’immobile dopo la firma con un presidio puntuale di scadenze, incassi, comunicazioni e interventi, mantenendo il proprietario sempre aggiornato.',
+    points: ['Canoni, scadenze e rendicontazione', 'Assistenza a proprietà e conduttori', 'Rinnovi, manutenzioni e riconsegna'],
+    icon: ShieldCheck,
+  },
 ];
 
 const imageFallback =
@@ -99,8 +127,9 @@ export default function HomePage() {
             </span>
           </Link>
           <div className="hidden items-center gap-8 text-sm font-medium text-[#e9dfcf] lg:flex">
-            <a href="#immobili">Immobili</a>
-            <a href="#promozione">Promozione</a>
+            <a href="#servizi">Servizi</a>
+            <a href="#immobili">Proprietà</a>
+            <a href="#promozione">Portali</a>
             <a href="#metodo">Metodo</a>
           </div>
           <Link className="premium-button header-admin" href="/admin">
@@ -125,15 +154,15 @@ export default function HomePage() {
           <div className="hero-copy max-w-4xl">
             <p className="eyebrow gold">Maison Aurea · Luxury real estate advisory</p>
             <h1 className="display-type mt-5 text-5xl leading-[0.92] text-white md:text-7xl lg:text-8xl">
-              Immobili di pregio, rappresentati con visione.
+              Vendita, affitti e gestione. Un solo standard: eccellenza.
             </h1>
             <p className="designer-copy mt-6 max-w-2xl text-base leading-7 text-[#eee6da] md:text-lg md:leading-8">
-              Selezioniamo dimore rare e ne costruiamo il valore attraverso immagine,
-              consulenza e distribuzione digitale internazionale.
+              Dalla valutazione alla firma, fino alla gestione quotidiana: proteggiamo
+              il valore dell’immobile con consulenza, immagine e controllo operativo.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a className="premium-button gold" href="#immobili">
-                Esplora le proprietà
+              <a className="premium-button gold" href="#servizi">
+                Scopri i servizi
                 <ArrowUpRight className="h-4 w-4" />
               </a>
               <a className="premium-button hero-secondary-button" href="#contatti">
@@ -177,9 +206,9 @@ export default function HomePage() {
       <section id="promozione" className="portal-band border-y border-[#d7c8b3] bg-[#171511] py-8 text-[#fff7ea]">
         <div className="mx-auto grid max-w-7xl gap-6 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <p className="eyebrow gold">Syndication immobiliare</p>
+            <p className="eyebrow gold">Visibilità multipiattaforma</p>
             <h2 className="display-type mt-3 text-3xl md:text-5xl">
-              Dal dossier interno ai portali, senza duplicare il lavoro.
+              Vendita e locazione sui portali giusti, con una regia centralizzata.
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
@@ -193,15 +222,56 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="services-section" id="servizi">
+        <div className="mx-auto max-w-7xl px-5 py-20">
+          <div className="services-heading grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p className="eyebrow">01 · Servizi immobiliari</p>
+              <h2 className="display-type mt-4 text-4xl leading-none md:text-6xl">
+                Tre competenze, un solo interlocutore.
+              </h2>
+            </div>
+            <p className="max-w-2xl text-lg leading-8 text-[#cfc4b3]">
+              Maison Aurea accompagna proprietari, investitori e conduttori con un
+              servizio costruito intorno alla qualità dell’immobile e agli obiettivi
+              economici di chi lo affida.
+            </p>
+          </div>
+
+          <div className="services-grid mt-14">
+            {services.map(({ description, eyebrow, icon: Icon, points, title }, index) => (
+              <article className="service-card" key={title}>
+                <div className="service-card-top">
+                  <span className="service-index">0{index + 1}</span>
+                  <span className="service-icon"><Icon className="h-5 w-5" /></span>
+                </div>
+                <p className="service-eyebrow">{eyebrow}</p>
+                <h3>{title}</h3>
+                <p className="service-description">{description}</p>
+                <ul>
+                  {points.map((point) => (
+                    <li key={point}><CheckCircle2 className="h-4 w-4" /> {point}</li>
+                  ))}
+                </ul>
+                <a href="#contatti">
+                  Richiedi una consulenza
+                  <ArrowUpRight className="h-4 w-4" />
+                </a>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="immobili" className="relative mx-auto max-w-7xl px-5 py-20">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow">01 · Portfolio curato</p>
-            <h2 className="display-type mt-3 text-4xl md:text-6xl">Residenze in rappresentanza</h2>
+            <p className="eyebrow">02 · Portfolio curato</p>
+            <h2 className="display-type mt-3 text-4xl md:text-6xl">Proprietà selezionate</h2>
           </div>
           <div className="max-w-md border-l border-[#b99051] pl-5 text-[#655c4f]">
             <strong className="block text-sm uppercase text-[#171511]">{filtered.length} proprietà selezionate</strong>
-            <p className="mt-2">Ogni incarico riceve una strategia di posizionamento, immagine e distribuzione dedicata.</p>
+            <p className="mt-2">Residenze in vendita e opportunità in locazione, presentate con informazioni chiare e immagini di qualità.</p>
           </div>
         </div>
 
@@ -242,21 +312,21 @@ export default function HomePage() {
       <section id="metodo" className="method-section bg-[#fffaf2] py-20">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-[0.72fr_1.28fr]">
           <div className="method-intro">
-            <p className="eyebrow">02 · Il nostro metodo</p>
+            <p className="eyebrow">03 · Il nostro metodo</p>
             <h2 className="display-type mt-4 text-4xl leading-none md:text-6xl">
-              Una regia unica, dall’incarico alla trattativa.
+              Una regia unica, dall’incarico alla gestione.
             </h2>
             <p className="mt-6 max-w-md leading-7 text-[#655c4f]">
-              Tecnologia e sensibilità editoriale lavorano insieme per aumentare
-              qualità percepita, copertura e precisione commerciale.
+              Competenze commerciali, cura editoriale e controllo operativo lavorano
+              insieme per proteggere valore, tempo e qualità della relazione.
             </p>
           </div>
           <div className="method-list">
             {[
-              [Building2, 'Mandato', 'Analisi, posizionamento e presentazione autorevole per proprietari esigenti.'],
-              [Camera, 'Immagine', 'Direzione fotografica, gallery e testi costruiti intorno al carattere della proprietà.'],
-              [Megaphone, 'Distribuzione', 'Pubblicazione coordinata su Immobiliare.it, Idealista, Casa.it, Subito e altri canali.'],
-              [ShieldCheck, 'Governance', 'Controllo centralizzato di prezzo, stato, promozione, media e pubblicazione.'],
+              [Building2, 'Analisi', 'Valore di mercato, obiettivo economico e strategia vengono definiti prima della pubblicazione.'],
+              [Camera, 'Presentazione', 'Fotografia, testi e materiali raccontano la proprietà con precisione e riconoscibilità.'],
+              [Megaphone, 'Commercializzazione', 'Campagne e portali vengono coordinati per raggiungere interlocutori realmente qualificati.'],
+              [ShieldCheck, 'Gestione', 'Trattative, contratti, scadenze e attività locative restano sotto un controllo puntuale.'],
             ].map(([Icon, title, text], index) => (
               <article className="method-row" key={String(title)}>
                 <span className="method-number">0{index + 1}</span>
@@ -272,9 +342,9 @@ export default function HomePage() {
       <section className="owner-cta" id="contatti">
         <div className="mx-auto flex max-w-7xl flex-col gap-7 px-5 py-16 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow gold">Valutazione riservata</p>
+            <p className="eyebrow gold">Consulenza riservata</p>
             <h2 className="display-type mt-4 max-w-4xl text-4xl leading-none text-white md:text-6xl">
-              La tua proprietà merita una presentazione all’altezza del suo valore.
+              Vuoi vendere, affittare o delegare la gestione del tuo immobile?
             </h2>
           </div>
           <a className="premium-button gold shrink-0" href="https://www.whatsapp.com/" rel="noreferrer" target="_blank">
@@ -288,7 +358,7 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-7 md:grid-cols-[1fr_auto_auto] md:items-center">
           <div>
             <strong className="text-2xl">Maison Aurea</strong>
-            <p className="mt-1 text-[#b8ab96]">Atelier digitale per immobili di pregio e mandati qualificati.</p>
+            <p className="mt-1 max-w-xl text-[#b8ab96]">Vendita, locazione e property management per immobili selezionati.</p>
           </div>
           <nav aria-label="Canali social" className="social-links">
             {socialLinks.map(({ href, icon: Icon, label }) => (
