@@ -1,8 +1,12 @@
 import { put } from '@vercel/blob';
+import { isAdminAuthenticated } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  if (!(await isAdminAuthenticated())) {
+    return Response.json({ error: 'Non autorizzato' }, { status: 401 });
+  }
   const form = await request.formData();
   const file = form.get('file');
   if (!(file instanceof File)) {
@@ -16,4 +20,3 @@ export async function POST(request: Request) {
 
   return Response.json({ url: blob.url, key: blob.pathname });
 }
-

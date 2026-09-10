@@ -5,27 +5,23 @@ import Link from 'next/link';
 import useEmblaCarousel from 'embla-carousel-react';
 import {
   ArrowUpRight,
-  AtSign,
   Bath,
   BedDouble,
-  BriefcaseBusiness,
   Building2,
   Camera,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Gem,
   KeyRound,
   MapPin,
   Maximize2,
-  MessageCircle,
   Megaphone,
   Search,
   ShieldCheck,
-  Sparkles,
-  Users,
 } from 'lucide-react';
 import { formatPrice, seedProperties, type Property } from './data';
+import { PropertyCard } from '@/components/site/property-card';
+import { PublicShell } from '@/components/site/public-shell';
 
 const channels = [
   'Immobiliare.it',
@@ -34,13 +30,6 @@ const channels = [
   'Subito',
   'Wikicasa',
   'Trovacasa',
-];
-
-const socialLinks = [
-  { label: 'Instagram', href: 'https://www.instagram.com/', icon: AtSign },
-  { label: 'Facebook', href: 'https://www.facebook.com/', icon: Users },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/', icon: BriefcaseBusiness },
-  { label: 'WhatsApp', href: 'https://www.whatsapp.com/', icon: MessageCircle },
 ];
 
 const services = [
@@ -147,36 +136,7 @@ export default function HomePage() {
   }, [carouselApi, carouselPaused, filtered.length]);
 
   return (
-    <main className="site-shell min-h-screen bg-[#f7f1e8] text-[#171511]">
-      <div aria-hidden="true" className="ambient-grid" />
-      <div aria-hidden="true" className="luxury-noise" />
-      <header className="public-header sticky top-0 z-40">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <Link className="flex items-center gap-3" href="/">
-            <span className="brand-mark">
-              <Gem className="h-5 w-5" />
-            </span>
-            <span>
-              <strong className="block text-lg leading-none text-[#fff7ea]">Maison Aurea</strong>
-              <small className="text-xs uppercase tracking-[0.18em] text-[#d7a84d]">
-                Real estate atelier
-              </small>
-            </span>
-          </Link>
-          <div className="hidden items-center gap-8 text-sm font-medium text-[#e9dfcf] lg:flex">
-            <a href="#servizi">Servizi</a>
-            <a href="#immobili">Proprietà</a>
-            <a href="#promozione">Portali</a>
-            <a href="#metodo">Metodo</a>
-          </div>
-          <Link className="premium-button header-admin" href="/admin">
-            <span className="hidden sm:inline">Area riservata</span>
-            <span className="sm:hidden">Admin</span>
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </nav>
-      </header>
-
+    <PublicShell>
       <section className="editorial-hero">
         <img
           alt={hero.title}
@@ -198,13 +158,11 @@ export default function HomePage() {
               valutazioni accurate, immagini autorevoli e trattative riservate.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a className="premium-button gold" href="#immobili">
+              <Link className="premium-button gold" href="/immobili">
                 Scopri le dimore
                 <ArrowUpRight className="h-4 w-4" />
-              </a>
-              <a className="premium-button hero-secondary-button" href="#contatti">
-                Vendi con Maison Aurea
-              </a>
+              </Link>
+              <Link className="premium-button hero-secondary-button" href="/appuntamento">Vendi con Maison Aurea</Link>
             </div>
           </div>
 
@@ -232,10 +190,10 @@ export default function HomePage() {
               options={['Qualsiasi', 'Fino a 900k', '900k - 2M', 'Oltre 2M']}
               value={budget}
             />
-            <a className="search-button" href="#immobili">
+            <Link className="search-button" href="/immobili">
               <Search className="h-5 w-5" />
               Cerca
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -282,42 +240,7 @@ export default function HomePage() {
           role="region"
         >
           <div className="property-carousel-track">
-            {filtered.map((property) => (
-              <Link className="property-card property-slide group reveal-card" href={`/properties/${property.slug}`} key={property.id}>
-                <div className="property-media relative overflow-hidden rounded-[8px]">
-                  <img
-                    alt={property.title}
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                    decoding="async"
-                    loading="lazy"
-                    onError={handleImageError}
-                    src={property.heroImage}
-                  />
-                  <span aria-hidden="true" className="property-image-shade" />
-                  {property.promoted && <span className="promo-badge">Promosso</span>}
-                </div>
-                <div className="property-content pt-4">
-                  <p className="text-sm uppercase tracking-[0.14em] text-[#8a6432]">
-                    {property.city} · {property.district}
-                  </p>
-                  <h3 className="mt-2 text-xl font-semibold leading-tight 2xl:text-2xl">{property.title}</h3>
-                  <p className="mt-3 text-[#655c4f]">{property.shortDescription}</p>
-                  <div className="property-specs">
-                    <span><Maximize2 className="h-4 w-4" /> {property.surface} mq</span>
-                    <span><BedDouble className="h-4 w-4" /> {property.rooms} locali</span>
-                    <span><Bath className="h-4 w-4" /> {property.bathrooms} bagni</span>
-                    <span>Classe {property.energyClass}</span>
-                  </div>
-                  <div className="mt-auto flex items-center justify-between border-t border-[#d7c8b3] pt-4">
-                    <strong className="property-price">{formatPrice(property.price)}</strong>
-                    <span className="flex items-center gap-2 text-sm font-semibold">
-                      Scopri
-                      <ChevronRight className="h-4 w-4" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+            {filtered.map((property) => <PropertyCard key={property.id} property={property} slide />)}
           </div>
         </div>
       </section>
@@ -372,10 +295,10 @@ export default function HomePage() {
                     <li key={point}><CheckCircle2 className="h-4 w-4" /> {point}</li>
                   ))}
                 </ul>
-                <a href="#contatti">
+                <Link href="/appuntamento">
                   Richiedi una consulenza
                   <ArrowUpRight className="h-4 w-4" />
-                </a>
+                </Link>
               </article>
             ))}
           </div>
@@ -420,52 +343,13 @@ export default function HomePage() {
               Vuoi vendere, affittare o delegare la gestione del tuo immobile?
             </h2>
           </div>
-          <a className="premium-button gold shrink-0" href="https://www.whatsapp.com/" rel="noreferrer" target="_blank">
-            Parla con un advisor
+          <Link className="premium-button gold shrink-0" href="/appuntamento">
+            Prenota un appuntamento
             <ArrowUpRight className="h-4 w-4" />
-          </a>
-        </div>
-      </section>
-
-      <footer className="border-t border-white/10 bg-[#171511] px-5 py-10 text-[#fff7ea]">
-        <div className="mx-auto grid max-w-7xl gap-7 md:grid-cols-[1fr_auto_auto] md:items-center">
-          <div>
-            <strong className="text-2xl">Maison Aurea</strong>
-            <p className="mt-1 max-w-xl text-[#b8ab96]">Vendita, locazione e property management per immobili selezionati.</p>
-          </div>
-          <nav aria-label="Canali social" className="social-links">
-            {socialLinks.map(({ href, icon: Icon, label }) => (
-              <a
-                aria-label={label}
-                href={href}
-                key={label}
-                rel="noreferrer"
-                target="_blank"
-                title={label}
-              >
-                <Icon className="h-5 w-5" />
-              </a>
-            ))}
-          </nav>
-          <Link className="premium-button gold" href="/admin">
-            Apri admin
-            <Sparkles className="h-4 w-4" />
           </Link>
         </div>
-      </footer>
-
-      <a
-        aria-label="Contatta Maison Aurea su WhatsApp"
-        className="whatsapp-fab"
-        href="https://www.whatsapp.com/"
-        rel="noreferrer"
-        target="_blank"
-        title="WhatsApp"
-      >
-        <MessageCircle className="h-6 w-6" />
-        <span>Parliamo</span>
-      </a>
-    </main>
+      </section>
+    </PublicShell>
   );
 }
 

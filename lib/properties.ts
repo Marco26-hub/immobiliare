@@ -1,12 +1,5 @@
-import { neon } from '@neondatabase/serverless';
 import { seedProperties, type Property } from '@/app/data';
-
-function getSql() {
-  if (!process.env.DATABASE_URL) {
-    return null;
-  }
-  return neon(process.env.DATABASE_URL);
-}
+import { getSql } from '@/lib/db';
 
 export function slugify(value: string) {
   return value
@@ -100,29 +93,30 @@ export async function ensurePropertiesSchema() {
   return true;
 }
 
-export async function listProperties() {
+export async function listProperties(includeUnpublished = false) {
   const sql = getSql();
   if (!sql) {
     return { properties: seedProperties, demo: true };
   }
 
   await ensurePropertiesSchema();
-  const rows = await sql`
-    SELECT * FROM properties
-    ORDER BY promoted DESC, featured DESC, created_at DESC
-  `;
+  const rows = includeUnpublished
+    ? await sql`SELECT * FROM properties ORDER BY promoted DESC, featured DESC, created_at DESC`
+    : await sql`SELECT * FROM properties WHERE status = 'published' ORDER BY promoted DESC, featured DESC, created_at DESC`;
 
   return { properties: rows.map(rowToProperty), demo: false };
 }
 
-export async function getPropertyBySlug(slug: string) {
+export async function getPropertyBySlug(slug: string, includeUnpublished = false) {
   const sql = getSql();
   if (!sql) {
     return seedProperties.find((property) => property.slug === slug) || null;
   }
 
   await ensurePropertiesSchema();
-  const rows = await sql`SELECT * FROM properties WHERE slug = ${slug} LIMIT 1`;
+  const rows = includeUnpublished
+    ? await sql`SELECT * FROM properties WHERE slug = ${slug} LIMIT 1`
+    : await sql`SELECT * FROM properties WHERE slug = ${slug} AND status = 'published' LIMIT 1`;
   return rows[0] ? rowToProperty(rows[0]) : null;
 }
 
@@ -172,3 +166,9 @@ export async function upsertProperty(property: Property) {
   return property;
 }
 
+export async function deleteProperty(id: string) {
+  const sql = getSql();
+  if (!sql) return false;
+  const rows = await sql`DELETE FROM properties WHERE id = ${id} RETURNING id`;
+  return rows.length > 0;
+}

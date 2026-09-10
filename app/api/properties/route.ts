@@ -1,5 +1,6 @@
 import { type Property } from '@/app/data';
-import { listProperties, slugify, upsertProperty } from '@/lib/properties';
+import { deleteProperty, listProperties, slugify, upsertProperty } from '@/lib/properties';
+import { isAdminAuthenticated } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
@@ -13,11 +14,14 @@ const json = (data: unknown, init?: ResponseInit) =>
   });
 
 export async function GET() {
-  const result = await listProperties();
+  const result = await listProperties(await isAdminAuthenticated());
   return json(result);
 }
 
 export async function POST(request: Request) {
+  if (!(await isAdminAuthenticated())) {
+    return json({ error: 'Non autorizzato' }, { status: 401 });
+  }
   const body = (await request.json()) as Partial<Property>;
   const now = new Date().toISOString();
   const id = body.id || crypto.randomUUID();
@@ -51,3 +55,13 @@ export async function POST(request: Request) {
   return json({ property: await upsertProperty(property) }, { status: 201 });
 }
 
+export async function DELETE(request: Request) {
+  if (!(await isAdminAuthenticated())) {
+    return json({ error: 'Non autorizzato' }, { status: 401 });
+  }
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id) return json({ error: 'ID mancante' }, { status: 400 });
+  return (await deleteProperty(id))
+    ? json({ ok: true })
+    : json({ error: 'Immobile non trovato' }, { status: 404 });
+}

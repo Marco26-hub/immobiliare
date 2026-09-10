@@ -46,5 +46,32 @@ await sql`
   ON properties(city, category)
 `;
 
-console.log('Neon pronto: tabella properties e indici creati.');
+await sql`
+  CREATE TABLE IF NOT EXISTS appointments (
+    id TEXT PRIMARY KEY,
+    property_id TEXT,
+    property_title TEXT,
+    service TEXT NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TEXT NOT NULL,
+    message TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'new',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  )
+`;
 
+await sql`
+  CREATE INDEX IF NOT EXISTS idx_appointments_date
+  ON appointments(appointment_date, appointment_time)
+`;
+
+await sql`
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_active_slot
+  ON appointments(appointment_date, appointment_time)
+  WHERE status <> 'cancelled'
+`;
+
+console.log('Neon pronto: tabelle properties e appointments con relativi indici create.');
